@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<save>
+    <header version="2" />
+    <version major="3" minor="6" revision="6" build="0" />
+    <region id="MetaData">
+        <node id="root">
+            <attribute id="Module" value="48da7749-e1d0-45f5-8ab7-9862e8a86efc" type="23" />
+            <attribute id="Name" value="lx_tenebrium" type="23" />
+            <attribute id="Type" value="Adventure" type="23" />
+            <attribute id="UUID" value="d5e385f3-16b0-466e-adbb-7448f18e1540" type="23" />
+        </node>
+    </region>
+</save>
