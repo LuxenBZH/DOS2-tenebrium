@@ -7,7 +7,7 @@
             <children>
                 <node id="Dependencies" />
                 <node id="ModuleInfo">
-                    <attribute id="Author" value="" type="30" />
+                    <attribute id="Author" value="Luxen" type="30" />
                     <attribute id="CharacterCreationLevelName" value="" type="22" />
                     <attribute id="Description" value="" type="30" />
                     <attribute id="DescriptionName" value="" handle="ls::TranslatedStringRepository::s_HandleUnknown" type="28" />
@@ -17,12 +17,12 @@
                     <attribute id="LobbyLevelName" value="" type="22" />
                     <attribute id="MD5" value="" type="23" />
                     <attribute id="MenuLevelName" value="" type="22" />
-                    <attribute id="Name" value="lx_tenebrium" type="22" />
+                    <attribute id="Name" value="Tenebrium Arcana" type="22" />
                     <attribute id="NumPlayers" value="2" type="1" />
                     <attribute id="PhotoBooth" value="" type="22" />
                     <attribute id="StartupLevelName" value="" type="22" />
                     <attribute id="Tags" value="" type="30" />
-                    <attribute id="Type" value="Adventure" type="22" />
+                    <attribute id="Type" value="Add-on" type="22" />
                     <attribute id="UUID" value="48da7749-e1d0-45f5-8ab7-9862e8a86efc" type="22" />
                     <attribute id="Version" value="268435456" type="4" />
                     <children>

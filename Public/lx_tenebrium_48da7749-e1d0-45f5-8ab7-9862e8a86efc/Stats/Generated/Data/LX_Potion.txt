@@ -1,0 +1,4 @@
+new entry "Stats_TEN_Paranoia"
+type "Potion"
+data "ShadowResistance" "-20"
+data "Flag" "ClairvoyantImmunity,SleepingImmunity,EnragedImmunity"
