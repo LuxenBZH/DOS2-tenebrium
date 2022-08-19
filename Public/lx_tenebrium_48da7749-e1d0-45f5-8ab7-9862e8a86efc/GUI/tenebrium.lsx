@@ -72,8 +72,8 @@
                     <attribute id="Width" value="64" type="4" />
                 </node>
                 <node id="TextureAtlasPath">
-                    <attribute id="Path" value="Assets/Textures/Icons/newAtlas.dds" type="20" />
-                    <attribute id="UUID" value="a1fc2a8e-cd56-417f-b1f9-9b0b2594d6b2" type="22" />
+                    <attribute id="Path" value="Assets/Textures/tenebrium.dds" type="20" />
+                    <attribute id="UUID" value="232101fe-ce74-421e-bdd5-ea3fc754d0fb" type="22" />
                 </node>
                 <node id="TextureAtlasTextureSize">
                     <attribute id="Height" value="512" type="4" />

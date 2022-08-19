@@ -28,7 +28,7 @@ data "AccuracyBoost" "50"
 
 new entry "Stats_TEN_HollowPool"
 type "Potion"
-data "MovementSpeedBoost" "-80"
+data "MovementSpeedBoost" "-60"
 
 new entry "Stats_TEN_Overcharge1"
 type "Potion"
