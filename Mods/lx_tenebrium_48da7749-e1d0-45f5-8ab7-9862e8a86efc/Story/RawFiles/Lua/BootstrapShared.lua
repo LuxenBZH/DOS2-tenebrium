@@ -1,3 +1,8 @@
+if not PersistentVars then
+    PersistentVars = {
+        Hex = {}
+    }
+end
 -- Ext.Require("Stats/Shared/Effects.lua")
 Ext.Require("Shared/_InitShared.lua")
 

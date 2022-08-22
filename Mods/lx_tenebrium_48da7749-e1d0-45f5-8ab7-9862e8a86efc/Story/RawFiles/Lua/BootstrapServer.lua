@@ -1,8 +1,10 @@
+if not PersistentVars then
+    PersistentVars = {}
+    PersistentVars.Hex = {}
+end
+
 Ext.Require("BootstrapShared.lua")
 Ext.Require("Server/_InitServer.lua")
-
-
-PersistentVars = {}
 
 ------ Main ------
 ---- General Functions ----

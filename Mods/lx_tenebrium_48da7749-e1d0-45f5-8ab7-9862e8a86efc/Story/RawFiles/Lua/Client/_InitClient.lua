@@ -16,6 +16,7 @@ end)
 Ext.Require("Client/Tenebrium/Overhead.lua")
 Ext.Require("Client/Tenebrium/BarManagement.lua")
 Ext.Require("Client/Tenebrium/Tooltips.lua")
+Ext.Require("Client/Tenebrium/Effects.lua")
 
 -- CustomStatSystem = Mods.LeaderLib.CustomStatSystem
 

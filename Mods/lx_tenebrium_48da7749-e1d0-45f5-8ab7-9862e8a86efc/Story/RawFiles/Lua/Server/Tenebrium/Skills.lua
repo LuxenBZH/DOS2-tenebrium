@@ -243,3 +243,11 @@ local function HitAnalysis(target, instigator, damage, handle)
 end
 
 Ext.RegisterOsirisListener("NRD_OnHit", 4, "after", HitAnalysis)
+
+--- @param e EsvLuaBeforeStatusApplyEvent
+Ext.Events.BeforeStatusApply:Subscribe(function(e)
+    if Ext.Utils.IsValidHandle(e.Status.StatusSourceHandle) and Osi.HasActiveStatus(Ext.Entity.GetCharacter(e.Status.StatusSourceHandle).MyGuid, "TEN_HEX") == 1 and e.Status.LifeTime >= 12.0 then
+        e.Status.LifeTime = e.Status.LifeTime - 6.0
+        e.Status.CurrentLifeTime = e.Status.CurrentLifeTime - 6.0
+    end
+end)
