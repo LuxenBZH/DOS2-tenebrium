@@ -5,9 +5,12 @@ local function CalculateTEIncrease(character, multiplier)
     -- local tInfusion = tInfusionData:GetValue(character)
     local tInfusion = Ext.GetCharacter(character):GetCustomStat(StatTI.Id)
     if tInfusion == 0 then return end
-    if tInfusion < 20 then tInfusion = 20 end
-    local scaledDamp = math.log(50-(tInfusion/2.2))/2
-    local gain = Ext.Round((tInfusion*scaledDamp)*multiplier)
+    -- if tInfusion < 20 then tInfusion = 20 end
+    if multiplier > 1 then multiplier = 1 end
+    local maxRange = math.max(math.ceil(tInfusion/2.5), 5)
+    local scaledDamp = math.log(50-(tInfusion/3))/2
+    -- local gain = Ext.Round((tInfusion*scaledDamp)*multiplier)
+    local gain = Ext.Round(Ext.Math.Lerp(0, maxRange, multiplier))
     -- tInfusionData:SetValue(character, CustomStatSystem:GetStatByID("TenebriumEnergy", TenID):GetValue(character)+gain)
     SetVarInteger(character, "SRP_TEnergy", gain)
     SetStoryEvent(character, "SRP_UpdateTE")
@@ -40,7 +43,7 @@ end
 ---@param handle integer status handle
 ---@param instigator string GUID
 local function HitAnalysis(target, instigator, damage, handle)
-    local multiplier = 1
+    local multiplier = 0.5
     local gain = false
     local pass,target = pcall(Ext.GetCharacter, target)
     if not pass then return end
@@ -74,12 +77,12 @@ local function HitAnalysis(target, instigator, damage, handle)
     end
     -- Critical hit gain
     if critical == 1 and backstab == 0 then
-        local totalDmg = GetTotalDamage(target.MyGuid, handle)
-        local expected = 2 * Game.Math.GetAverageLevelDamage(instigator.Stats.Level)
-        if totalDmg < expected then
-            multiplier = multiplier * (totalDmg/expected)
-        end
-        multiplier = multiplier * (100 - instigator.Stats.CriticalChance)/100
+        -- local totalDmg = GetTotalDamage(target.MyGuid, handle)
+        -- local expected = 2 * Game.Math.GetAverageLevelDamage(instigator.Stats.Level)
+        -- if totalDmg < expected then
+        --     multiplier = multiplier * (totalDmg/expected)
+        -- end
+        multiplier = (100 - instigator.Stats.CriticalChance)/100 * Osi.NRD_CharacterGetComputedStat(instigator.MyGuid, "CriticalMultiplier", 0) / 100
         CalculateTEIncrease(target.MyGuid, multiplier)
     end
     -- Resistance gain
@@ -91,9 +94,11 @@ local function HitAnalysis(target, instigator, damage, handle)
             local resistance = target.Stats[dmgType.."Resistance"]
             if resistance > 0 then
                 if not gain then
-                    local dmgMultiplier = dmg/(1-resistance*0.01)/Game.Math.GetAverageLevelDamage(instigator.Stats.Level)
-                    Ext.Print("Resistance TE gain:",dmg,Game.Math.GetAverageLevelDamage(instigator.Stats.Level),dmgMultiplier)
-                    multiplier = 0 + (dmgMultiplier/8)
+                    -- local dmgMultiplier = (1-resistance*0.01) * dmg/Game.Math.GetAverageLevelDamage(instigator.Stats.Level)
+                    -- Ext.Print("Resistance TE gain:",dmg,Game.Math.GetAverageLevelDamage(instigator.Stats.Level),dmgMultiplier)
+                    _P(resistance*0.01, dmg/Game.Math.GetAverageLevelDamage(instigator.Stats.Level))
+                    multiplier = (math.min(resistance*0.01, 1) * math.min(dmg/(resistance*0.01)/Game.Math.GetAverageLevelDamage(instigator.Stats.Level), 1))*0.75
+                    _P("Resistance mult:", multiplier)
                     gain = true
                 end
             end
