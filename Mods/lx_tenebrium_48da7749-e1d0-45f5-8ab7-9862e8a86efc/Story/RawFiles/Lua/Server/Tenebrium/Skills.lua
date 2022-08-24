@@ -223,6 +223,7 @@ local function HitAnalysis(target, instigator, damage, handle)
     local pass,target = pcall(Ext.GetCharacter, target)
     if not pass then return end
     if Ext.GetGameObject(instigator) == nil then return end
+    if ObjectExists(instigator) == 0 then return end
     local pass,instigator = pcall(Ext.GetCharacter, instigator)
     if not pass then return end
     local status = Ext.GetStatus(target.MyGuid, handle)
