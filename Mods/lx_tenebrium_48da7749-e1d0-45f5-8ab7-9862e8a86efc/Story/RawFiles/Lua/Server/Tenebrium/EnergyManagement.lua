@@ -48,6 +48,19 @@ local tEnergyArray = {
     [75] = "SRP_TE75"
 }
 
+local tEnergyArrayRequirement = {
+    [5] = "SRP_TE_R5",
+    [10] = "SRP_TE_R10",
+    [15] = "SRP_TE_R15",
+    [20] = "SRP_TE_R20",
+    [25] = "SRP_TE_R25",
+    [30] = "SRP_TE_R30",
+    [35] = "SRP_TE_R35",
+    [40] = "SRP_TE_R40",
+    [50] = "SRP_TE_R50",
+    [75] = "SRP_TE_R75"
+}
+
 local ocThresholds = {
     [1] = "TEN_OVERCHARGE1",
     [2] = "TEN_OVERCHARGE2",
@@ -78,6 +91,15 @@ end
 local function UpdateTETag(character, newValue)
     -- Ext.Print(newValue)
     for value, tag in pairs(tEnergyArray) do
+        if tonumber(newValue) >= value then
+            SetTag(character, tag)
+            -- Ext.Print("Set", character, tag)
+        else
+            ClearTag(character, tag)
+            -- Ext.Print("Cleared", character, tag)
+        end
+    end
+    for value, tag in pairs(tEnergyArrayRequirement) do
         if tonumber(newValue) >= value then
             SetTag(character, tag)
             -- Ext.Print("Set", character, tag)
@@ -130,13 +152,13 @@ local function UpdateTE(character, event)
     -- local ti = CustomStatSystem:GetStatByID("TenebriumInfusion", SScarID):GetValue(character)
     local ti = char:GetCustomStat(StatTI.Id)
     if newValue > 100 then newValue = 100 end
-    -- Overcharge lock if it's not your turn
-    if IsTagged(character, "SRP_InCombatTurn") == 0 then
-        if oldValue < ti and newValue > ti then
-            newValue = ti
-        end
-    else
-    end
+    -- -- Overcharge lock if it's not your turn
+    -- if IsTagged(character, "SRP_InCombatTurn") == 0 then
+    --     if oldValue < ti and newValue > ti then
+    --         newValue = ti
+    --     end
+    -- else
+    -- end
     if newValue < 0 then newValue = 0 end
     -- CustomStatSystem:GetStatByID("TenebriumEnergy", SScarID):SetValue(character, newValue)
     char:SetCustomStat(StatTE.Id, newValue)
@@ -193,3 +215,24 @@ Ext.RegisterOsirisListener("CharacterUsedSkill", 4, "before", ConsumeTEfromTag)
 --         UpdateTE(character.MyGuid, "SRP_UpdateTE")
 --     end
 -- end)
+
+Ext.Osiris.RegisterListener("ObjectLeftCombat", 2, "after", function(object, combatID)
+    if Osi.ObjectIsCharacter(object) == 1 then
+        ApplyStatus(object, "TEN_TEDECAY", 6.0, 1.0)
+    end
+end)
+
+Ext.Osiris.RegisterListener("CharacterDied", 1, "before", function(character)
+    SetTag(character, "SRP_TEIgnoreCombat")
+    SetVarInteger(character, "SRP_TEnergy", -100)
+    SetStoryEvent(character, "SRP_UpdateTE")
+end)
+
+Ext.Osiris.RegisterListener("CharacterStatusRemoved", 3, "before", function(character, status, causee)
+    if status == "TEN_TEDECAY" and Ext.Entity.GetCharacter(character):GetCustomStat(StatTE.Id) > 0 then
+        SetTag(character, "SRP_TEIgnoreCombat")
+        SetVarInteger(character, "SRP_TEnergy", -10)
+        SetStoryEvent(character, "SRP_UpdateTE")
+        ApplyStatus(character, "TEN_TEDECAY", 6.0, 1.0)
+    end
+end)

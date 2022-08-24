@@ -43,10 +43,13 @@ end
 ---@param handle integer status handle
 ---@param instigator string GUID
 local function HitAnalysis(target, instigator, damage, handle)
-    local multiplier = 0.5
-    local gain = false
+    local instigatorMultiplier = 0.5
+    local instigatorGain = false
+    local targetMultiplier = 0.5
+    local targetGain = false
     local pass,target = pcall(Ext.GetCharacter, target)
     if not pass then return end
+    if ObjectExists(instigator) == 0 then return end
     if Ext.GetGameObject(instigator) == nil then return end
     local pass,instigator = pcall(Ext.GetCharacter, instigator)
     if not pass then return end
@@ -64,48 +67,58 @@ local function HitAnalysis(target, instigator, damage, handle)
     -- Ext.Print(bonus, shadowDmg*(bonus/100))
     -- NRD_HitStatusAddDamage(target, handle, "Shadow", shadowDmg*(bonus/100))
     if sourceType == 1 or sourceType == 2 or sourceType == 3 then return end
+    
+    -- Critical hit gain
+    if critical == 1 and backstab == 0 then
+        targetMultiplier = (100 - instigator.Stats.CriticalChance)/100 * Osi.NRD_CharacterGetComputedStat(instigator.MyGuid, "CriticalMultiplier", 0) / 100
+        targetGain = true
+    end
+    -- Sigil of Hollowness
+    if target:GetStatus("TEN_SIGIL_HOLLOWNESS") then
+        for i, dmgType in pairs(damageTypes) do
+            local dmg = NRD_HitStatusGetDamage(target.MyGuid, handle, dmgType)
+            if dmg > 0 then
+                targetMultiplier = math.min(dmg/(4*Game.Math.GetAverageLevelDamage(target.Stats.Level)), 1)
+                targetGain = true
+            end
+        end
+    end
+
     -- Miss gain
     if dodged == 1 or missed == 1 or blocked == 1 then
         local weapon = Ext.GetItem(instigator.Stats.MainWeapon)
         if weapon ~= nil then 
-            if not weapon.Stats.IsTwoHanded then multiplier = multiplier * 0.5 end
-            if not Game.Math.IsRangedWeapon(weapon) then multiplier = multiplier * 0.66 end
+            if not weapon.Stats.IsTwoHanded then instigatorMultiplier = instigatorMultiplier * 0.5 end
+            if not Game.Math.IsRangedWeapon(weapon) then instigatorMultiplier = instigatorMultiplier * 0.66 end
         end
-        multiplier = multiplier * Game.Math.CalculateHitChance(instigator.Stats, target.Stats)/100
-        CalculateTEIncrease(instigator.MyGuid, multiplier)
-        return
-    end
-    -- Critical hit gain
-    if critical == 1 and backstab == 0 then
-        -- local totalDmg = GetTotalDamage(target.MyGuid, handle)
-        -- local expected = 2 * Game.Math.GetAverageLevelDamage(instigator.Stats.Level)
-        -- if totalDmg < expected then
-        --     multiplier = multiplier * (totalDmg/expected)
-        -- end
-        multiplier = (100 - instigator.Stats.CriticalChance)/100 * Osi.NRD_CharacterGetComputedStat(instigator.MyGuid, "CriticalMultiplier", 0) / 100
-        CalculateTEIncrease(target.MyGuid, multiplier)
-    end
-    -- Resistance gain
-    for i, dmgType in pairs(damageTypes) do
-        -- Ext.Print(hitContext.Hit)
-        -- local dmg = hitContext.Hit.DamageList.GetByType(hitContext.Hit.DamageList, dmgType)
-        local dmg = NRD_HitStatusGetDamage(target.MyGuid, handle, dmgType)
-        if dmg > 0 then
-            local resistance = target.Stats[dmgType.."Resistance"]
-            if resistance > 0 then
-                if not gain then
-                    -- local dmgMultiplier = (1-resistance*0.01) * dmg/Game.Math.GetAverageLevelDamage(instigator.Stats.Level)
-                    -- Ext.Print("Resistance TE gain:",dmg,Game.Math.GetAverageLevelDamage(instigator.Stats.Level),dmgMultiplier)
-                    _P(resistance*0.01, dmg/Game.Math.GetAverageLevelDamage(instigator.Stats.Level))
-                    multiplier = (math.min(resistance*0.01, 1) * math.min(dmg/(resistance*0.01)/Game.Math.GetAverageLevelDamage(instigator.Stats.Level), 1))*0.75
-                    _P("Resistance mult:", multiplier)
-                    gain = true
+        instigatorMultiplier = instigatorMultiplier * Game.Math.CalculateHitChance(instigator.Stats, target.Stats)/100
+        instigatorGain = true
+    else
+        -- Resistance gain
+        for i, dmgType in pairs(damageTypes) do
+            -- Ext.Print(hitContext.Hit)
+            -- local dmg = hitContext.Hit.DamageList.GetByType(hitContext.Hit.DamageList, dmgType)
+            local dmg = NRD_HitStatusGetDamage(target.MyGuid, handle, dmgType)
+            if dmg > 0 then
+                local resistance = target.Stats[dmgType.."Resistance"]
+                if resistance > 0 then
+                    if not instigatorGain then
+                        -- local dmgMultiplier = (1-resistance*0.01) * dmg/Game.Math.GetAverageLevelDamage(instigator.Stats.Level)
+                        -- Ext.Print("Resistance TE gain:",dmg,Game.Math.GetAverageLevelDamage(instigator.Stats.Level),dmgMultiplier)
+                        instigatorMultiplier = (math.min(resistance*0.01, 1) * math.min(dmg/(resistance*0.01)/Game.Math.GetAverageLevelDamage(instigator.Stats.Level), 1))*0.75
+                        instigatorGain = true
+                    end
                 end
             end
         end
     end
-    if gain then
-        CalculateTEIncrease(instigator.MyGuid, multiplier)
+    
+    if instigatorGain then
+        CalculateTEIncrease(instigator.MyGuid, instigatorMultiplier)
+    end
+    if targetGain then
+        _P("PROCESS TO TE INCREASE", targetMultiplier)
+        CalculateTEIncrease(target.MyGuid, targetMultiplier)
     end
     -- 2nd step infusion
     -- if GetOverchargeStep(instigator) > 1 and (status.DamageSourceType == "Attack" or status.SkillId ~= "") then
